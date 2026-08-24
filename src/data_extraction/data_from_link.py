@@ -4,9 +4,9 @@ from typing import Iterable
 import requests
 from dateutil.relativedelta import relativedelta
 from pathlib import Path
-import pandas as pd
 
 
+# urls for data download
 BASE_URL = "https://d37ci6vzurychx.cloudfront.net/trip-data/"
 taxi_type_url_dict = {
     "yellow": "yellow_tripdata",
@@ -54,6 +54,9 @@ def set_time_window(months: int) -> Iterable[date]:
 
 
 def main():
+    """
+    run the downloader
+    """
     parser = argparse.ArgumentParser(
         description="Download taxi trip data",
     )
@@ -62,9 +65,6 @@ def main():
 
     tp_months = args.tp_months
 
-    if not isinstance(tp_months, int):
-        print(type(tp_months))
-        raise ValueError(f"TP_MONTHS must be an integer")
     if tp_months < 1 or tp_months > 180:
         raise ValueError("TP_MONTHS must be greater than 0 and less than or equal to 180")
 
