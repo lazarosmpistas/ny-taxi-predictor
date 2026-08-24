@@ -1,0 +1,15 @@
+.venv
+__pycache__/
+.ipynb_checkpoints/
+
+data/
+
+models/
+
+.idea/
+.vscode/
+
+*.pt
+**.pth
+
+taxi_data/
