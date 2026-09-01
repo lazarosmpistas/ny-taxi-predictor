@@ -70,6 +70,7 @@ def main():
 
     dates = set_time_window(months=tp_months)
     for date in dates:
+        print(f"downloading data for {date.month}-{date.year}")
         download_data(date.year, date.month, taxi_type_url_dict["yellow"])
 
 
