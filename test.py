@@ -13,3 +13,6 @@ spark = (
 )
 
 spark.read.parquet(f"taxi_data/yellow_tripdata/yellow_tripdata_taxi_data_2026_5.parquet").show(5)
+
+
+spark.stop()
