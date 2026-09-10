@@ -4,10 +4,12 @@ from typing import Iterable
 import requests
 from dateutil.relativedelta import relativedelta
 from pathlib import Path
+import time
+import numpy as np
 
 
 # urls for data download
-BASE_URL = "https://d37ci6vzurychx.cloudfront.net/trip-data/"
+BASE_URL = "https://d37ci6vzurychx.cloudfront.net/trip-data/" # www.nyc.gov
 taxi_type_url_dict = {
     "yellow": "yellow_tripdata",
     "green": "green_tripdata",
@@ -49,6 +51,7 @@ def set_time_window(months: int) -> Iterable[date]:
     for month in range(1, diff_months+1):
         date_to_add = first_date + relativedelta(months=month)
         dates.append(date_to_add)
+
     return dates
 
 
@@ -72,6 +75,9 @@ def main():
     for date in dates:
         print(f"downloading data for {date.month}-{date.year}")
         download_data(date.year, date.month, taxi_type_url_dict["yellow"])
+
+        time.sleep(np.random.uniform(0.5, 1.5))
+
 
 
 if __name__ == "__main__":
