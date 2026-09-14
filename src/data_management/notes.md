@@ -1,0 +1,3 @@
+- i do not think we need store_and_fwd_flag
+- fares, payment types etc are useless because they are calculated at the end of a trip, we need to predict the trip 
+before the actual trip
