@@ -3,3 +3,4 @@
 before the actual trip
 - RatecodeID None should be renamed to "99"
 - possibly negative fares are actually positive with a minus by a bug
+- many NAs on key columns / find correlation and predict them?
