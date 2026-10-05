@@ -17,6 +17,10 @@ def create_unified_df(
     spark: Optional[SparkSession],
     pq_num: int = PARQUET_FILES_NUM,
 ):
+    if mode == "spark" and spark is None:
+        raise ValueError("spark session is required in spark mode")
+    elif mode == "pandas" and spark is not None:
+        raise ValueError("spark session is not required in pandas mode")
     data_filenames = os.listdir(DATA_FOLDER)
     filenames_dict = {"_".join(filename.split(".")[0].split("_")[4:]): filename for filename in data_filenames}
 
@@ -25,7 +29,7 @@ def create_unified_df(
     sorted_date_dict = dict(sorted(date_dict.items(), key=lambda x: x[0]))
 
     ### create empty dataframe???
-    df_main = pd.DataFrame() if mode == "pandas" else SparkSession.createDataFrame(data=[], schema=StructType([]), verify_schema=False)
+    df_main = pd.DataFrame() if mode == "pandas" else spark.createDataFrame(data=[], schema=StructType([]), verifySchema=False)
     ###
     for date in sorted_date_dict.values()[PARQUET_FILES_NUM - pq_num:]:
         filename = "".join([GENERIC_FILENAME, date, ".parquet"])
