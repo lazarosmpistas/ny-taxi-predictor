@@ -1,22 +1,22 @@
 import pandas as pd
 from pyspark.sql import SparkSession
 from pyspark.sql.classic.dataframe import DataFrame
-from typing import Iterable, Literal, Optional
+from typing import Literal, Optional
 import os
 import datetime
 from pathlib import Path
 import glob
 
-PARENT_FOLDER = Path(os.path.abspath("")).parent.parent
+PARENT_FOLDER = Path(__file__).resolve().parent.parent
 DATA_FOLDER = PARENT_FOLDER / "taxi_data" / "yellow_tripdata"
 GENERIC_FILENAME = "yellow_tripdata_taxi_data_"
-PARQUET_FILES_NUM = len(glob.glob(str(DATA_FOLDER / "*.parquet")))
 
 def create_unified_df(
-    mode: Literal["spark", "pandas"],
+    pq_num: int,
+    mode: Literal["spark", "pandas"]="pandas",
     spark: Optional[SparkSession] = None,
-    pq_num: int = PARQUET_FILES_NUM,
 ) -> DataFrame | pd.DataFrame:
+    PARQUET_FILES_NUM = len(glob.glob(str(DATA_FOLDER / "*.parquet")))
 
     if pq_num > PARQUET_FILES_NUM:
         raise ValueError(f"pq_num greater than number of parquet files | current parquet files: {PARQUET_FILES_NUM}")
@@ -25,6 +25,9 @@ def create_unified_df(
         raise ValueError("spark session is required in spark mode")
     elif mode == "pandas" and spark is not None:
         raise ValueError("spark session is not required in pandas mode")
+    elif mode not in ["spark", "pandas"]:
+        raise ValueError("mode must be either spark or pandas")
+
     data_filenames = os.listdir(DATA_FOLDER)
     filenames_dict = {"_".join(filename.split(".")[0].split("_")[4:]): filename for filename in data_filenames}
 
@@ -32,7 +35,7 @@ def create_unified_df(
                  list(filenames_dict.keys())}
     sorted_date_dict = dict(sorted(date_dict.items(), key=lambda x: x[0]))
 
-    #df_main = pd.DataFrame() if mode == "pandas" else spark.createDataFrame(data=[], schema=StructType([]), verifySchema=False)
+    #df = pd.DataFrame() if mode == "pandas" else spark.createDataFrame(data=[], schema=StructType([]), verifySchema=False)
     df_main = None
 
     for date in list(sorted_date_dict.values())[PARQUET_FILES_NUM - pq_num:]:
@@ -45,7 +48,7 @@ def create_unified_df(
                 df_main = spark.read.parquet(str(filepath))
             else:
                 df = spark.read.parquet(str(filepath))
-                df_main = df_main.union(df)
+                df_main = df_main.unionByName(df)
         elif mode == "pandas":
             if df_main is None:
                 df_main = pd.read_parquet(filepath, dtype_backend="pyarrow")
