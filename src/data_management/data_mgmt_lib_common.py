@@ -7,16 +7,21 @@ import datetime
 from pathlib import Path
 import glob
 
-PARENT_FOLDER = Path(__file__).resolve().parent.parent
+PARENT_FOLDER = Path(__file__).resolve().parent.parent.parent
 DATA_FOLDER = PARENT_FOLDER / "taxi_data" / "yellow_tripdata"
 GENERIC_FILENAME = "yellow_tripdata_taxi_data_"
 
+PARQUET_FILES_NUM = len(glob.glob(str(DATA_FOLDER / "*.parquet")))
+
+
 def create_unified_df(
-    pq_num: int,
+    pq_num: Optional[int] = None,
     mode: Literal["spark", "pandas"]="pandas",
     spark: Optional[SparkSession] = None,
 ) -> DataFrame | pd.DataFrame:
-    PARQUET_FILES_NUM = len(glob.glob(str(DATA_FOLDER / "*.parquet")))
+
+    if pq_num is None:
+        pq_num = PARQUET_FILES_NUM
 
     if pq_num > PARQUET_FILES_NUM:
         raise ValueError(f"pq_num greater than number of parquet files | current parquet files: {PARQUET_FILES_NUM}")
@@ -35,7 +40,6 @@ def create_unified_df(
                  list(filenames_dict.keys())}
     sorted_date_dict = dict(sorted(date_dict.items(), key=lambda x: x[0]))
 
-    #df = pd.DataFrame() if mode == "pandas" else spark.createDataFrame(data=[], schema=StructType([]), verifySchema=False)
     df_main = None
 
     for date in list(sorted_date_dict.values())[PARQUET_FILES_NUM - pq_num:]:
