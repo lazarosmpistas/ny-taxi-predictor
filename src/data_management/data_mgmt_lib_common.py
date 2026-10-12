@@ -6,6 +6,7 @@ import os
 import datetime
 from pathlib import Path
 import glob
+import pyspark.sql.functions as F
 
 PARENT_FOLDER = Path(__file__).resolve().parent.parent.parent
 DATA_FOLDER = PARENT_FOLDER / "taxi_data" / "yellow_tripdata"
@@ -40,7 +41,7 @@ def create_unified_df(
                  list(filenames_dict.keys())}
     sorted_date_dict = dict(sorted(date_dict.items(), key=lambda x: x[0]))
 
-    df_main = None
+    df_main = None if mode == "spark" else None
 
     for date in list(sorted_date_dict.values())[PARQUET_FILES_NUM - pq_num:]:
         filename = "".join([GENERIC_FILENAME, date, ".parquet"])
@@ -52,6 +53,10 @@ def create_unified_df(
                 df_main = spark.read.parquet(str(filepath))
             else:
                 df = spark.read.parquet(str(filepath))
+                if df.schema != df_main.schema:
+                    additional_cols = [col for col in df.columns if col not in df_main.columns]
+                    print(additional_cols)
+                    df_main = df_main.withColumns({col: F.lit(None).cast(df.schema[col].dataType) for col in additional_cols})
                 df_main = df_main.unionByName(df)
         elif mode == "pandas":
             if df_main is None:
@@ -61,3 +66,10 @@ def create_unified_df(
                 df_main = pd.concat([df_main, df])
 
     return df_main
+
+def main():
+    spark = SparkSession.builder.appName("test_common").master("local[*]").getOrCreate()
+    create_unified_df(mode="spark", spark=spark)
+
+if __name__ == "__main__":
+    main()

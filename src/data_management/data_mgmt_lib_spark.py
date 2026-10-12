@@ -5,7 +5,7 @@ import pyspark.sql.functions as F
 
 
 def _print_df_count(df_dirty_count: int, df_clean_count: int) -> None:
-    print(f"total rows before: {str(df_dirty_count)[:9]} | bad rows: {str(df_dirty_count - df_clean_count)[:9]} | total rows after: {str(df_clean_count)[:9]}")
+    print(f"total rows before: {str(df_dirty_count):10} | bad rows: {str(df_dirty_count - df_clean_count):10} | total rows after: {str(df_clean_count):10}")
 
 
 def remove_bad_distance(df: DataFrame) -> DataFrame:
