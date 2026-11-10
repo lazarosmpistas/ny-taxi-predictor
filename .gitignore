@@ -13,3 +13,4 @@ models/
 **.pth
 
 taxi_data/
+AGENTS.md
